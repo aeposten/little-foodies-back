@@ -1,51 +1,58 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  skip_before_action :authenticate_user, only: [:create, :show]
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found_response
+  rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity_response
 
-  # GET /users
   def index
-    @users = User.all
-
-    render json: @users
+    users = User.all
+    render json: users
   end
 
-  # GET /users/1
   def show
-    render json: @user
+      current_user ? (render json: current_user, status: :ok) : (render json: "Not authenticated", status: :unauthorized)
+      #     render json: current_user, status: :ok
+      # else 
+      #     render json: "Not authenticated", status: :unauthorized
+      # end
   end
 
-  # POST /users
   def create
-    @user = User.new(user_params)
-
-    if @user.save
-      render json: @user, status: :created, location: @user
-    else
-      render json: @user.errors, status: :unprocessable_entity
+    user = User.create(user_params)
+    if user.valid?
+        session[:user_id] = user.id
+        render json: user, status: :created 
+    else 
+        render json: user.errors.full_messages, status: :unprocessable_entity 
     end
   end
 
-  # PATCH/PUT /users/1
-  def update
-    if @user.update(user_params)
-      render json: @user
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
-  end
+  # def update
+    #user = find_user
+    #user.update(user_params)
+    #render json: user
+  #end
 
-  # DELETE /users/1
   def destroy
-    @user.destroy
+    activity = find_user
+    activity.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_user
-      @user = User.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def user_params
-      params.fetch(:user, {})
-    end
+  def user_params
+    params.permit(:first_name, :last_name, :username, :email, :password, :passwword_confirmation)
+  end
+
+  def find_user
+    User.find(params[:id])
+  end
+
+  def render_not_found_response
+    render json: { error: "User not found"}, status: :not_found
+  end
+
+  def render_unprocessable_entity_response(invalid)
+    render json: { errors: invalid.record.errors.full_messages }, status: :unprocessable_entity
+  end
 end
