@@ -11,7 +11,7 @@ class UsersController < ApplicationController
   def show
     #  if current_user ? (render json: current_user, status: :ok) : (render json: "Not authenticated", status: :unauthorized)
     if current_user
-        render json: current_user, serializer: UserChildrenSerializer, status: :ok
+        render json: current_user, serializer: UserChildrenSerializer status: :ok
     else 
         render json: "Not authenticated", status: :unauthorized
     end

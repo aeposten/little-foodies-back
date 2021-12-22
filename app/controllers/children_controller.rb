@@ -14,20 +14,10 @@ class ChildrenController < ApplicationController
   end
 
   def create
-    child = Child.create!(user_params)
-    if user.valid?
-        session[:child_id] = child.id
-        render json: child, status: :created 
-    else 
-        render json: child.errors.full_messages, status: :unprocessable_entity 
-    end
+    child = current_user.children.create!(child_params)
+    render json: child, status: :created
   end
 
-  # def update
-    #user = find_user
-    #user.update(user_params)
-    #render json: user
-  #end
 
   def destroy
     activity = find_child
@@ -36,11 +26,12 @@ class ChildrenController < ApplicationController
   end
 
   private
-  def user_params
-    params.permit(:first_name, :age)
+
+  def child_params
+    params.permit(:first_name, :age, :img_url)
   end
 
-  def find_user
+  def find_child
     Child.find(params[:id])
   end
 

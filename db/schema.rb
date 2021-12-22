@@ -18,6 +18,7 @@ ActiveRecord::Schema.define(version: 2021_12_21_211229) do
   create_table "children", force: :cascade do |t|
     t.string "first_name"
     t.integer "age"
+    t.string "img_url"
     t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
