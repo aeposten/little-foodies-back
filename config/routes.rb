@@ -6,4 +6,6 @@ Rails.application.routes.draw do
 
   post "/register", to: "users#create"
   get "/me", to: "users#show"
+
+  post "/addchild", to: "children#create"
 end
