@@ -9,15 +9,17 @@ class UsersController < ApplicationController
   end
 
   def show
-      current_user ? (render json: current_user, status: :ok) : (render json: "Not authenticated", status: :unauthorized)
-      #     render json: current_user, status: :ok
-      # else 
-      #     render json: "Not authenticated", status: :unauthorized
-      # end
+    #  if current_user ? (render json: current_user, status: :ok) : (render json: "Not authenticated", status: :unauthorized)
+    if current_user
+        render json: current_user, serializer: UserChildrenSerializer, status: :ok
+    else 
+        render json: "Not authenticated", status: :unauthorized
+    end
   end
 
+
   def create
-    user = User.create(user_params)
+    user = User.create!(user_params)
     if user.valid?
         session[:user_id] = user.id
         render json: user, status: :created 
@@ -41,7 +43,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.permit(:first_name, :last_name, :username, :email, :password, :passwword_confirmation)
+    params.permit(:first_name, :last_name, :username, :email, :password, :password_confirmation)
   end
 
   def find_user
@@ -55,4 +57,5 @@ class UsersController < ApplicationController
   def render_unprocessable_entity_response(invalid)
     render json: { errors: invalid.record.errors.full_messages }, status: :unprocessable_entity
   end
+
 end
